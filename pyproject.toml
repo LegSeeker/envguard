@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sapra-envguard"
+version = "0.1.0"
+description = "Validate .env files against .env.example without ever printing secret values."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Sapra AI" }]
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+envguard = "envguard.cli:main"
+
+[tool.setuptools]
+packages = ["envguard"]
