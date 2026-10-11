@@ -16,8 +16,8 @@ jobs:
         python: ["3.9", "3.13"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
       - run: python -m unittest discover -s tests -v
@@ -25,7 +25,7 @@ jobs:
   action:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Write sample files
         run: |
           printf 'DATABASE_URL=\nAPI_KEY=changeme\n' > .env.example

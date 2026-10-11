@@ -47,7 +47,7 @@ single quotes (literal) and double quotes (`\n`, `\"`, `\\` escapes).
 ## GitHub Action
 
 ```yaml
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: LegSeeker/envguard@v0.1.0
   with:
     strict: "true"          # optional
