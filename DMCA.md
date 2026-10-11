@@ -1,6 +1,6 @@
 # DMCA & Copyright Policy
 
-This product is an original creation of Sapra AI. If you believe your copyrighted material is present, please open an issue or reach out to our agent at [Insert Contact] for immediate resolution/takedown.
+This product is an original creation of Sapra AI. If you believe your copyrighted material is present, please open an issue or reach out to our agent at [support@sapra.app] for immediate resolution/takedown.
 
 ## Issue resolution policy
 
