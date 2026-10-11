@@ -1,0 +1,42 @@
+name: envguard
+description: Check .env.example (and optionally .env) for missing, malformed or leaked values. Never prints values.
+author: Sapra AI
+branding:
+  icon: shield
+  color: green
+
+inputs:
+  example:
+    description: Path to the example/schema file.
+    default: .env.example
+  env:
+    description: Path to an env file to validate against the example. Leave empty to check the example only.
+    default: ""
+  strict:
+    description: Treat warnings as failures ("true"/"false").
+    default: "false"
+  format:
+    description: Output format, "text" or "json".
+    default: text
+
+runs:
+  using: composite
+  steps:
+    - name: Run envguard
+      shell: bash
+      env:
+        PYTHONPATH: ${{ github.action_path }}
+        EG_EXAMPLE: ${{ inputs.example }}
+        EG_ENV: ${{ inputs.env }}
+        EG_STRICT: ${{ inputs.strict }}
+        EG_FORMAT: ${{ inputs.format }}
+      run: |
+        PY=""
+        for c in python3 python; do
+          if "$c" -c "" >/dev/null 2>&1; then PY="$c"; break; fi
+        done
+        if [ -z "$PY" ]; then echo "envguard: no Python found; add actions/setup-python" >&2; exit 2; fi
+        args=(--example "$EG_EXAMPLE" --format "$EG_FORMAT")
+        if [ -n "$EG_ENV" ]; then args+=(--env "$EG_ENV"); else args+=(--example-only); fi
+        if [ "$EG_STRICT" = "true" ]; then args+=(--strict); fi
+        "$PY" -m envguard "${args[@]}"

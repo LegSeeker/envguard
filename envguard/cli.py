@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from envguard import __version__
-from envguard.checks import run_checks
+from envguard.checks import check_example, run_checks
 from envguard.parser import parse_env
 
 
@@ -18,6 +18,8 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--env", default=".env", help="path to the env file (default: .env)")
     p.add_argument("--example", default=".env.example",
                    help="path to the example/schema file (default: .env.example)")
+    p.add_argument("--example-only", action="store_true",
+                   help="check only the example file (no .env needed; for CI and pre-commit)")
     p.add_argument("--strict", action="store_true", help="treat warnings as failures")
     p.add_argument("--format", choices=("text", "json"), default="text")
     p.add_argument("--version", action="version", version=f"envguard {__version__}")
@@ -26,8 +28,11 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Optional[List[str]] = None) -> int:
     args = _build_parser().parse_args(argv)
+    sources = [("example", args.example)]
+    if not args.example_only:
+        sources.insert(0, ("env", args.env))
     texts = {}
-    for label, path in (("env", args.env), ("example", args.example)):
+    for label, path in sources:
         try:
             texts[label] = Path(path).read_text(encoding="utf-8")
         except OSError as exc:
@@ -35,7 +40,11 @@ def main(argv: Optional[List[str]] = None) -> int:
                   file=sys.stderr)
             return 2
 
-    findings = run_checks(parse_env(texts["env"]), parse_env(texts["example"]))
+    example = parse_env(texts["example"])
+    if args.example_only:
+        findings = check_example(example)
+    else:
+        findings = run_checks(parse_env(texts["env"]), example)
     errors = sum(1 for f in findings if f.severity == "error")
     warnings = len(findings) - errors
 

@@ -137,6 +137,21 @@ class CliTests(unittest.TestCase):
         self.assertEqual((data["errors"], data["warnings"]), (1, 1))
         self.assertEqual({f["code"] for f in data["findings"]}, {"missing", "extra"})
 
+    def test_example_only_needs_no_env(self):
+        x = self.write(".env.example", "A=\nB=changeme\n")
+        missing_env = os.path.join(self.tmp.name, "nope")
+        code, out, _ = self.run_cli("--example-only", "--env", missing_env, "--example", x)
+        self.assertEqual(code, 0)
+        self.assertIn("0 error(s), 0 warning(s)", out)
+
+    def test_example_only_flags_secret_and_malformed(self):
+        x = self.write(".env.example", f"A={SECRET}\nBAD\n")
+        code, out, _ = self.run_cli("--example-only", "--example", x, "--strict")
+        self.assertEqual(code, 1)
+        self.assertIn("malformed", out)
+        self.assertIn("example-secret", out)
+        self.assertNotIn(SECRET, out)
+
     def test_values_never_printed(self):
         e = self.write(".env", f"A={SECRET}\nA={SECRET}\nX={SECRET}\nBAD {SECRET}\n")
         x = self.write(".env.example", f"A={SECRET}\nB=need\n")

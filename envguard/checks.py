@@ -21,13 +21,24 @@ def _sort_key(f: Finding):
     return (0 if f.severity == "error" else 1, f.line or 0, f.key or "")
 
 
+def _example_findings(example: ParseResult) -> List[Finding]:
+    findings = [Finding(f.code, f.key, f.line, f"(in example) {f.message}", f.severity)
+                for f in example.issues]
+    for key, ex_value in example.values.items():
+        if looks_like_secret(ex_value):
+            findings.append(Finding("example-secret", key, example.lines[key],
+                                    "example value looks like a real secret",
+                                    "warning"))
+    return findings
+
+
+def check_example(example: ParseResult) -> List[Finding]:
+    """Checks that need only the committed example file (for CI and pre-commit)."""
+    return sorted(_example_findings(example), key=_sort_key)
+
+
 def run_checks(env: ParseResult, example: ParseResult) -> List[Finding]:
-    findings: List[Finding] = []
-    for f in env.issues:
-        findings.append(f)
-    for f in example.issues:
-        findings.append(Finding(f.code, f.key, f.line,
-                                f"(in example) {f.message}", f.severity))
+    findings: List[Finding] = list(env.issues) + _example_findings(example)
 
     for key, ex_value in example.values.items():
         if key not in env.values:
@@ -36,10 +47,6 @@ def run_checks(env: ParseResult, example: ParseResult) -> List[Finding]:
         elif env.values[key] == "" and ex_value != "":
             findings.append(Finding("empty", key, env.lines[key],
                                     "set but empty", "error"))
-        if looks_like_secret(ex_value):
-            findings.append(Finding("example-secret", key, example.lines[key],
-                                    "example value looks like a real secret",
-                                    "warning"))
 
     for key in env.values:
         if key not in example.values:

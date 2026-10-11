@@ -47,6 +47,7 @@ python -m envguard [--env PATH] [--example PATH] [--strict] [--format text|json]
 ```
 
 - Defaults: `--env .env`, `--example .env.example`.
+- `--example-only`: skip the env file; report only example parser issues and `example-secret`.
 - Missing file -> print error to stderr, exit code 2.
 - Exit 1 if any error finding (or any warning when `--strict`), else 0.
 - text format: one line per finding `LEVEL code [line N] KEY: message`, then a summary line

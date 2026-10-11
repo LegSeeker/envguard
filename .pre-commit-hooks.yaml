@@ -1,0 +1,7 @@
+- id: envguard
+  name: envguard (check .env.example)
+  description: Flag malformed lines, duplicates and real-looking secrets in .env.example.
+  entry: envguard --example-only
+  language: python
+  files: (^|/)\.env\.example$
+  pass_filenames: false
